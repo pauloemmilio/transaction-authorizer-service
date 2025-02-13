@@ -1,5 +1,6 @@
 package com.transaction.authorizer.dto.response
 
 data class TransactionResponseDTO(
-    val code: String
+    val code: String,
+    val message: String
 )

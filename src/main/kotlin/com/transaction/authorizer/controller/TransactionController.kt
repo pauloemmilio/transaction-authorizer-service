@@ -22,7 +22,10 @@ class TransactionController(
         val response = transactionService.authorizeTransaction(
             transaction.account, transaction.amount, transaction.mcc, transaction.merchant
         )
-        val transactionResponseDTO = TransactionResponseDTO(response)
+        val transactionResponseDTO = TransactionResponseDTO(
+            code = response.code,
+            message = response.message
+        )
         return ResponseEntity.ok(transactionResponseDTO)
     }
 }

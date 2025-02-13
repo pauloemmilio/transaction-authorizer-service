@@ -1,13 +1,39 @@
 package com.transaction.authorizer.service
 
+import com.transaction.authorizer.entity.Balance
+import com.transaction.authorizer.enums.ResponseCodeEnum
 import org.springframework.stereotype.Service
 import java.math.BigDecimal
 
 @Service
-class TransactionService {
+class TransactionService(
+    private val accountService: AccountService,
+    private val transactionCategoryService: TransactionCategoryService,
+    private val balanceService: BalanceService
+) {
 
-    fun authorizeTransaction(account: String, amount: BigDecimal, mcc: String, merchant: String): String {
-        //TODO implement authorization logic
-        return ""
+    fun authorizeTransaction(accountId: String, amount: BigDecimal, mcc: String, merchant: String): ResponseCodeEnum {
+
+        val balance: Balance
+
+        try {
+            val account = accountService.findById(accountId)
+            val transactionCategory = transactionCategoryService.findByCode(mcc)
+            balance = balanceService.findByAccountIdAndTransactionCategory(accountId, transactionCategory.name)
+        } catch (e: Exception) {
+            return ResponseCodeEnum.ERROR
+        }
+
+        val transactionResponse = processTransaction(amount, balance)
+        return transactionResponse
+    }
+
+    private fun processTransaction(amount: BigDecimal, balance: Balance) = validateAmount(amount, balance)
+
+    private fun validateAmount(amount: BigDecimal, balance: Balance): ResponseCodeEnum {
+        if(amount > balance.availableAmount) {
+            return ResponseCodeEnum.REJECTED
+        }
+        return ResponseCodeEnum.APPROVED
     }
 }
