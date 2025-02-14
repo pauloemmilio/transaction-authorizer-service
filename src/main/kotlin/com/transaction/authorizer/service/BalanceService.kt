@@ -11,7 +11,7 @@ class BalanceService(
 ) {
 
     fun findByAccountIdAndTransactionCategory(accountId: String, name: String): Balance {
-        return balanceRepository.findByAccountIdAndTransactionCategory(accountId, name)
+        return balanceRepository.findByAccount_AccountIdAndTransactionCategory_Code(accountId, name)
             .orElseThrow { ResourceNotFoundException("Balance for account $accountId and transaction category $name not found") }
     }
 }

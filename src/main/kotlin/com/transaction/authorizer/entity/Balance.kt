@@ -7,7 +7,7 @@ import java.time.LocalDateTime
 @Entity
 @Table(
     name = "balance",
-    uniqueConstraints = [UniqueConstraint(columnNames = ["account_id", "transaction_category_name"])]
+    uniqueConstraints = [UniqueConstraint(columnNames = ["account_id", "transaction_category_code"])]
 )
 data class Balance(
     @Id
@@ -19,15 +19,15 @@ data class Balance(
     val account: Account,
 
     @ManyToOne
-    @JoinColumn(name = "transaction_category_name", nullable = false)
+    @JoinColumn(name = "transaction_category_code", nullable = false)
     val transactionCategory: TransactionCategory,
 
     @Column(name = "available_amount", nullable = false)
     var availableAmount: BigDecimal,
 
     @Column(name = "created_at", nullable = false, updatable = false)
-    val createdAt: LocalDateTime = LocalDateTime.now(),
+    val createdAt: LocalDateTime,
 
     @Column(name = "updated_at", nullable = false)
-    var updatedAt: LocalDateTime = LocalDateTime.now()
+    var updatedAt: LocalDateTime
 )
