@@ -7,5 +7,5 @@ import java.util.Optional
 
 @Repository
 interface BalanceRepository : JpaRepository<Balance, Long> {
-    fun findByAccount_AccountIdAndTransactionCategory_Code(accountId: String, name: String): Optional<Balance>
+    fun findByAccount_AccountIdAndTransactionCategory(accountId: String, name: String): Optional<Balance>
 }
