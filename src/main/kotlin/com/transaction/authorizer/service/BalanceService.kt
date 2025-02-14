@@ -10,6 +10,10 @@ class BalanceService(
     private val balanceRepository: BalanceRepository
 ) {
 
+    fun update(balance: Balance): Balance {
+        return balanceRepository.save(balance)
+    }
+
     fun findByAccountIdAndTransactionCategory(accountId: String, name: String): Balance {
         return balanceRepository.findByAccount_AccountIdAndTransactionCategory(accountId, name)
             .orElseThrow { ResourceNotFoundException("Balance for account $accountId and transaction category $name not found") }

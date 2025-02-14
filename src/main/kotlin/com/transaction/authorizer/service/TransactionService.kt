@@ -28,12 +28,14 @@ class TransactionService(
         return transactionResponse
     }
 
-    private fun processTransaction(amount: BigDecimal, balance: Balance) = validateAmount(amount, balance)
-
-    private fun validateAmount(amount: BigDecimal, balance: Balance): ResponseCodeEnum {
+    private fun processTransaction(amount: BigDecimal, balance: Balance): ResponseCodeEnum {
         if(amount > balance.availableAmount) {
             return ResponseCodeEnum.REJECTED
         }
+
+        val updatedBalance = balance.copy(availableAmount = balance.availableAmount - amount)
+        balanceService.update(updatedBalance)
+
         return ResponseCodeEnum.APPROVED
     }
 }
