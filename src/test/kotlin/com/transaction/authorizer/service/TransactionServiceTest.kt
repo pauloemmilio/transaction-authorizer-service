@@ -54,7 +54,7 @@ class TransactionServiceTest {
 
         every { balanceService.update(any()) } returns balance
 
-        val response = transactionService.authorizeTransaction(
+        val response = transactionService.processTransaction(
             accountId, amount, mcc, merchant
         )
 

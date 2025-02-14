@@ -11,18 +11,18 @@ class TransactionService(
     private val balanceService: BalanceService
 ) {
 
-    fun authorizeTransaction(accountId: String, amount: BigDecimal, mcc: String, merchant: String): ResponseCodeEnum {
+    fun processTransaction(accountId: String, amount: BigDecimal, mcc: String, merchant: String): ResponseCodeEnum {
         return try {
             val transactionCategory = transactionCategoryService.findTransactionCategoryNameByCode(mcc)
             val balance = balanceService.findByAccountIdAndTransactionCategory(accountId, transactionCategory)
 
-            processTransaction(amount, balance)
+            processBalance(amount, balance)
         } catch (e: Exception) {
             ResponseCodeEnum.ERROR
         }
     }
 
-    private fun processTransaction(amount: BigDecimal, balance: Balance): ResponseCodeEnum {
+    private fun processBalance(amount: BigDecimal, balance: Balance): ResponseCodeEnum {
         if (amount > balance.availableAmount) return ResponseCodeEnum.REJECTED
 
         balanceService.update(balance.copy(availableAmount = balance.availableAmount - amount))

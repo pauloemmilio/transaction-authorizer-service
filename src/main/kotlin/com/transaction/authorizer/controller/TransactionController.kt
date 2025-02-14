@@ -15,11 +15,11 @@ class TransactionController(
     private val transactionService: TransactionService
 ) {
 
-    @PostMapping("/authorize")
-    fun authorizeTransaction(
+    @PostMapping("/process")
+    fun processTransaction(
         @RequestBody(required = true) transaction: TransactionRequestDTO
     ): ResponseEntity<TransactionResponseDTO> {
-        val response = transactionService.authorizeTransaction(
+        val response = transactionService.processTransaction(
             transaction.account, transaction.amount, transaction.mcc, transaction.merchant
         )
         val transactionResponseDTO = TransactionResponseDTO(
