@@ -7,35 +7,25 @@ import java.math.BigDecimal
 
 @Service
 class TransactionService(
-    private val accountService: AccountService,
     private val transactionCategoryService: TransactionCategoryService,
     private val balanceService: BalanceService
 ) {
 
     fun authorizeTransaction(accountId: String, amount: BigDecimal, mcc: String, merchant: String): ResponseCodeEnum {
+        return try {
+            val transactionCategory = transactionCategoryService.findTransactionCategoryNameByCode(mcc)
+            val balance = balanceService.findByAccountIdAndTransactionCategory(accountId, transactionCategory)
 
-        val balance: Balance
-
-        try {
-            val account = accountService.findById(accountId)
-            val transactionCategory = transactionCategoryService.findByCode(mcc)
-            balance = balanceService.findByAccountIdAndTransactionCategory(accountId, transactionCategory.name)
+            processTransaction(amount, balance)
         } catch (e: Exception) {
-            return ResponseCodeEnum.ERROR
+            ResponseCodeEnum.ERROR
         }
-
-        val transactionResponse = processTransaction(amount, balance)
-        return transactionResponse
     }
 
     private fun processTransaction(amount: BigDecimal, balance: Balance): ResponseCodeEnum {
-        if(amount > balance.availableAmount) {
-            return ResponseCodeEnum.REJECTED
-        }
+        if (amount > balance.availableAmount) return ResponseCodeEnum.REJECTED
 
-        val updatedBalance = balance.copy(availableAmount = balance.availableAmount - amount)
-        balanceService.update(updatedBalance)
-
+        balanceService.update(balance.copy(availableAmount = balance.availableAmount - amount))
         return ResponseCodeEnum.APPROVED
     }
 }

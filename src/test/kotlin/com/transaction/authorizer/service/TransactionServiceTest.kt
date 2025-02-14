@@ -15,22 +15,21 @@ import kotlin.test.assertEquals
 
 class TransactionServiceTest {
 
-    private val accountService: AccountService = mockk<AccountService>()
     private val balanceService: BalanceService = mockk<BalanceService>()
     private val transactionCategoryService: TransactionCategoryService = mockk<TransactionCategoryService>()
 
     private val transactionService = TransactionService(
-        accountService, transactionCategoryService, balanceService
+        transactionCategoryService, balanceService
     )
 
     private val faker = Faker()
 
     @Test
-    fun `should authorize transaction with success and respond with approved`() {
-
+    fun `should authorize valid transaction with success`() {
         val accountId = faker.random.nextInt(1, 10).toString()
         val amount = BigDecimal.valueOf(faker.random.nextLong(10))
-        val mcc = "5811"
+        val mcc = faker.random.randomValue(listOf("5411", "5412", "5811", "5812"))
+        val categoryName = faker.random.randomValue(listOf("FOOD", "MEAL"))
         val merchant = faker.company.name()
 
         val account = Account(
@@ -38,7 +37,7 @@ class TransactionServiceTest {
         )
 
         val transactionCategory = TransactionCategory(
-            mcc, "MEAL", LocalDateTime.now(), LocalDateTime.now()
+            mcc, categoryName, LocalDateTime.now(), LocalDateTime.now()
         )
 
         val balance = Balance(
@@ -46,12 +45,8 @@ class TransactionServiceTest {
         )
 
         every {
-            accountService.findById(accountId)
-        } returns account
-
-        every {
-            transactionCategoryService.findByCode(mcc)
-        } returns transactionCategory
+            transactionCategoryService.findTransactionCategoryNameByCode(mcc)
+        } returns transactionCategory.name
 
         every {
             balanceService.findByAccountIdAndTransactionCategory(accountId, transactionCategory.name)
@@ -67,8 +62,7 @@ class TransactionServiceTest {
         assertEquals(ResponseCodeEnum.APPROVED.message, response.message)
 
         verify(exactly = 1) {
-            accountService.findById(accountId)
-            transactionCategoryService.findByCode(mcc)
+            transactionCategoryService.findTransactionCategoryNameByCode(mcc)
             balanceService.findByAccountIdAndTransactionCategory(accountId, transactionCategory.name)
             balanceService.update(any())
         }
