@@ -28,6 +28,8 @@ dependencies {
 	runtimeOnly("com.h2database:h2")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
+	testImplementation("io.mockk:mockk:1.13.16")
+	implementation("io.github.serpro69:kotlin-faker:1.14.0")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
