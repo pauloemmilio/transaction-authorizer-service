@@ -1,20 +1,23 @@
 package com.transaction.authorizer.entity
 
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.Id
-import jakarta.persistence.Table
+import jakarta.persistence.*
 import java.time.LocalDateTime
 
 @Entity
 @Table(name = "transaction_category")
 data class TransactionCategory(
     @Id
-    @Column(nullable = false, unique = true)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    val id: Long = 0,
+
+    @Column(nullable = true, unique = true)
     val code: String,
 
     @Column(nullable = false)
     val name: String,
+
+    @Column(name = "is_default", nullable = false)
+    val isDefault: Boolean,
 
     @Column(name = "created_at", nullable = false, updatable = false)
     val createdAt: LocalDateTime,
