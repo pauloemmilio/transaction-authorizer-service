@@ -15,7 +15,6 @@ class TransactionService(
         return try {
             val transactionCategory = transactionCategoryService.findTransactionCategoryNameByCode(mcc)
             val balance = balanceService.findByAccountIdAndTransactionCategory(accountId, transactionCategory)
-
             processBalance(amount, balance)
         } catch (e: Exception) {
             ResponseCodeEnum.ERROR
@@ -23,9 +22,30 @@ class TransactionService(
     }
 
     private fun processBalance(amount: BigDecimal, balance: Balance): ResponseCodeEnum {
-        if (amount > balance.availableAmount) return ResponseCodeEnum.REJECTED
+        if (amount <= balance.availableAmount) {
+            balanceService.update(balance.copy(availableAmount = balance.availableAmount - amount))
+            return ResponseCodeEnum.APPROVED
+        } else {
+            if(balance.transactionCategory == CASH_TRANSACTION_CATEGORY) {
+                return ResponseCodeEnum.REJECTED
+            }
 
-        balanceService.update(balance.copy(availableAmount = balance.availableAmount - amount))
-        return ResponseCodeEnum.APPROVED
+            val cashBalance = balanceService.findByAccountIdAndTransactionCategory(balance.account.accountId, CASH_TRANSACTION_CATEGORY)
+            val totalAmount = balance.availableAmount + cashBalance.availableAmount
+
+            if (amount <= totalAmount) {
+                val remainingBalance = amount - balance.availableAmount
+                balanceService.update(balance.copy(availableAmount = BigDecimal.ZERO))
+                balanceService.update(cashBalance.copy(availableAmount = cashBalance.availableAmount - remainingBalance))
+                return ResponseCodeEnum.APPROVED
+            }
+            else {
+                return ResponseCodeEnum.REJECTED
+            }
+        }
+    }
+
+    companion object {
+        private const val CASH_TRANSACTION_CATEGORY = "CASH"
     }
 }
