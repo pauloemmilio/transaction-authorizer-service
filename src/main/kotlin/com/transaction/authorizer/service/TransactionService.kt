@@ -22,28 +22,35 @@ class TransactionService(
     }
 
     private fun processBalance(amount: BigDecimal, balance: Balance): ResponseCodeEnum {
-        if (amount <= balance.availableAmount) {
-            balanceService.update(balance.copy(availableAmount = balance.availableAmount - amount))
-            return ResponseCodeEnum.APPROVED
-        } else {
-            if(balance.transactionCategory == CASH_TRANSACTION_CATEGORY) {
-                return ResponseCodeEnum.REJECTED
+        return when {
+            amount <= balance.availableAmount -> {
+                updateBalance(balance, amount)
+                ResponseCodeEnum.APPROVED
             }
-
-            val cashBalance = balanceService.findByAccountIdAndTransactionCategory(balance.account.accountId, CASH_TRANSACTION_CATEGORY)
-            val totalAmount = balance.availableAmount + cashBalance.availableAmount
-
-            if (amount <= totalAmount) {
-                val remainingBalance = amount - balance.availableAmount
-                balanceService.update(balance.copy(availableAmount = BigDecimal.ZERO))
-                balanceService.update(cashBalance.copy(availableAmount = cashBalance.availableAmount - remainingBalance))
-                return ResponseCodeEnum.APPROVED
-            }
-            else {
-                return ResponseCodeEnum.REJECTED
-            }
+            balance.transactionCategory == CASH_TRANSACTION_CATEGORY -> ResponseCodeEnum.REJECTED
+            else -> processAdditionalBalance(amount, balance)
         }
     }
+
+    private fun processAdditionalBalance(amount: BigDecimal, balance: Balance): ResponseCodeEnum {
+        val cashBalance = balanceService.findByAccountIdAndTransactionCategory(
+            balance.account.accountId, CASH_TRANSACTION_CATEGORY
+        )
+        val totalAvailableAmount = balance.availableAmount + cashBalance.availableAmount
+
+        return if (amount <= totalAvailableAmount) {
+            val remainingAmount = amount - balance.availableAmount
+            updateBalance(balance, balance.availableAmount)
+            updateBalance(cashBalance, remainingAmount)
+            ResponseCodeEnum.APPROVED
+        } else {
+            ResponseCodeEnum.REJECTED
+        }
+    }
+
+    private fun updateBalance(balance: Balance, deduction: BigDecimal) = balanceService.update(
+        balance.copy(availableAmount = balance.availableAmount - deduction)
+    )
 
     companion object {
         private const val CASH_TRANSACTION_CATEGORY = "CASH"
