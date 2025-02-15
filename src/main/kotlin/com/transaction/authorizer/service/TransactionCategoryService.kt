@@ -8,8 +8,7 @@ class TransactionCategoryService(
     private val transactionCategoryRepository: TransactionCategoryRepository
 ) {
 
-    fun findTransactionCategoryNameByCode(code: String): String {
-        val transactionCategory = transactionCategoryRepository.findByCode(code)
-        return transactionCategory?.name ?: transactionCategoryRepository.findByIsDefault().name
+    fun findTransactionCategoryNameByCode(code: String): String? {
+        return transactionCategoryRepository.findByCode(code)?.name
     }
 }

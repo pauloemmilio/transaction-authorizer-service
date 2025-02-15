@@ -13,4 +13,12 @@ INSERT INTO balance (account_id, transaction_category_name, available_amount, cr
 VALUES
     ('123456789', 'CASH', 100, NOW(), NOW()),
     ('123456789', 'FOOD', 100, NOW(), NOW()),
-    ('123456789', 'MEAL', 100, NOW(), NOW())
+    ('123456789', 'MEAL', 100, NOW(), NOW());
+
+INSERT INTO merchant (merchant, transaction_category_name, created_at, updated_at)
+VALUES
+    ('UBER TRIP                   SAO PAULO BR', 'CASH', NOW(), NOW()),
+    ('UBER EATS                   SAO PAULO BR', 'FOOD', NOW(), NOW()),
+    ('UBER EATS                   SAO PAULO BR', 'MEAL', NOW(), NOW()),
+    ('PAG*JoseDaSilva          RIO DE JANEI BR', 'MEAL', NOW(), NOW()),
+    ('PICPAY*BILHETEUNICO           GOIANIA BR', 'CASH', NOW(), NOW());

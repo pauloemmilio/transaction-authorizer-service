@@ -23,3 +23,12 @@ CREATE TABLE balance (
     FOREIGN KEY (account_id) REFERENCES account(account_id),
     UNIQUE (account_id, transaction_category_name)
 );
+
+CREATE TABLE merchant (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    merchant VARCHAR(255) NOT NULL,
+    transaction_category_name VARCHAR(50) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    UNIQUE (merchant, transaction_category_name)
+);
