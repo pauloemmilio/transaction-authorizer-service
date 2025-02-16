@@ -17,6 +17,7 @@ class TransactionService(
         return try {
             val transactionCategoryName = getTransactionCategoryName(merchant, mcc)
             val balance = balanceService.findByAccountIdAndTransactionCategory(accountId, transactionCategoryName)
+                ?: throw ResourceNotFoundException("Balance not found for account $accountId and transaction category $transactionCategoryName")
             processTransaction(amount, balance)
         } catch (e: Exception) {
             ResponseCodeEnum.ERROR
@@ -55,6 +56,11 @@ class TransactionService(
         val cashBalance = balanceService.findByAccountIdAndTransactionCategory(
             balance.account.accountId, DEFAULT_TRANSACTION_CATEGORY
         )
+
+        if (cashBalance == null) {
+            return ResponseCodeEnum.REJECTED
+        }
+
         val totalAvailableAmount = balance.availableAmount + cashBalance.availableAmount
 
         return if (amount <= totalAvailableAmount) {
