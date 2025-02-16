@@ -13,11 +13,11 @@ class TransactionService(
     val merchantService: MerchantService
 ) {
 
-    fun processTransaction(accountId: String, amount: BigDecimal, mcc: String, merchant: String): ResponseCodeEnum {
+    fun process(accountId: String, amount: BigDecimal, mcc: String, merchant: String): ResponseCodeEnum {
         return try {
             val transactionCategoryName = getTransactionCategoryName(merchant, mcc)
             val balance = balanceService.findByAccountIdAndTransactionCategory(accountId, transactionCategoryName)
-            processBalance(amount, balance)
+            processTransaction(amount, balance)
         } catch (e: Exception) {
             ResponseCodeEnum.ERROR
         }
@@ -40,7 +40,7 @@ class TransactionService(
             ?: DEFAULT_TRANSACTION_CATEGORY
     }
 
-    private fun processBalance(amount: BigDecimal, balance: Balance): ResponseCodeEnum {
+    private fun processTransaction(amount: BigDecimal, balance: Balance): ResponseCodeEnum {
         return when {
             amount <= balance.availableAmount -> {
                 updateBalance(balance, amount)
@@ -69,6 +69,7 @@ class TransactionService(
 
     private fun updateBalance(balance: Balance, deduction: BigDecimal) = balanceService.update(
         balance.copy(availableAmount = balance.availableAmount - deduction)
+        // TODO add transaction history
     )
 
     companion object {

@@ -23,7 +23,7 @@ class TransactionController(
     fun processTransaction(
         @RequestBody(required = true) transaction: TransactionRequestDTO
     ): ResponseEntity<TransactionResponseDTO> {
-        val response = transactionService.processTransaction(
+        val response = transactionService.process(
             transaction.account, transaction.amount, transaction.mcc, transaction.merchant
         )
         val transactionResponseDTO = TransactionResponseDTO(
