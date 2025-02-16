@@ -8,7 +8,8 @@ import java.math.BigDecimal
 
 @Service
 class BalanceService(
-    private val balanceRepository: BalanceRepository
+    private val balanceRepository: BalanceRepository,
+    private val transactionCategoryService: TransactionCategoryService
 ) {
 
     fun update(balance: Balance): Balance {
@@ -26,5 +27,18 @@ class BalanceService(
             availableAmount = amount
         )
         balanceRepository.save(balance)
+    }
+
+    fun addBalance(accountId: String, amount: BigDecimal, transactionCategoryName: String) {
+        transactionCategoryService.validatesTransactionCategory(transactionCategoryName)
+        val balance = findByAccountIdAndTransactionCategory(accountId, transactionCategoryName)
+
+        if (balance != null) {
+            balance.availableAmount = balance.availableAmount.add(amount)
+            update(balance)
+        } else {
+            val account = Account(accountId = accountId)
+            createBalance(account, transactionCategoryName, amount)
+        }
     }
 }
