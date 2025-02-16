@@ -7,8 +7,8 @@ import java.math.BigDecimal
 data class BalanceRequestDTO(
     @NotBlank
     val accountId: String,
-    @field:NotBlank
+    @NotBlank
     val transactionCategory: String,
-    @field:Positive
+    @Positive
     val amount: BigDecimal
 )
