@@ -32,3 +32,14 @@ CREATE TABLE merchant (
     updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
     UNIQUE (merchant, transaction_category_name)
 );
+
+CREATE TABLE transaction_history (
+    id BIGINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    account_id VARCHAR(255) NOT NULL,
+    amount DECIMAL(10,2) NOT NULL,
+    transaction_category VARCHAR(50) NOT NULL,
+    merchant VARCHAR(255) NOT NULL,
+    response_code VARCHAR(255) NOT NULL,
+    response_message VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);

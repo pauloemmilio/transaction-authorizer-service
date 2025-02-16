@@ -1,6 +1,7 @@
 package com.transaction.authorizer.service
 
 import com.transaction.authorizer.entity.Balance
+import com.transaction.authorizer.entity.TransactionHistory
 import com.transaction.authorizer.enums.ResponseCodeEnum
 import com.transaction.authorizer.exception.ResourceNotFoundException
 import org.springframework.stereotype.Service
@@ -10,7 +11,8 @@ import java.math.BigDecimal
 class TransactionService(
     private val transactionCategoryService: TransactionCategoryService,
     private val balanceService: BalanceService,
-    val merchantService: MerchantService
+    private val merchantService: MerchantService,
+    private val transactionHistoryService: TransactionHistoryService
 ) {
 
     fun process(accountId: String, amount: BigDecimal, mcc: String, merchant: String): ResponseCodeEnum {
@@ -18,7 +20,11 @@ class TransactionService(
             val transactionCategoryName = getTransactionCategoryName(merchant, mcc)
             val balance = balanceService.findByAccountIdAndTransactionCategory(accountId, transactionCategoryName)
                 ?: throw ResourceNotFoundException("Balance not found for account $accountId and transaction category $transactionCategoryName")
-            processTransaction(amount, balance)
+            val response = processTransaction(amount, balance)
+
+            createTransactionHistory(accountId, amount, transactionCategoryName, merchant, response)
+
+            return response
         } catch (e: Exception) {
             ResponseCodeEnum.ERROR
         }
@@ -27,18 +33,16 @@ class TransactionService(
     private fun getTransactionCategoryName(merchant: String, mcc: String): String {
         val merchants = merchantService.findByMerchant(merchant)
 
-        if (merchants.isEmpty()) {
-            throw ResourceNotFoundException("Merchant $merchant not found")
-        }
-
-        if (merchants.size == 1) {
+        if (merchants.isNotEmpty()) {
             return merchants.first().transactionCategory
         }
 
         val transactionCategoryMcc = transactionCategoryService.findTransactionCategoryNameByCode(mcc)
-        return merchants.firstOrNull { it.transactionCategory == transactionCategoryMcc }?.transactionCategory
-            ?: merchants.firstOrNull()?.transactionCategory
-            ?: DEFAULT_TRANSACTION_CATEGORY
+        if (transactionCategoryMcc != null) {
+            return transactionCategoryMcc
+        }
+
+        return DEFAULT_TRANSACTION_CATEGORY
     }
 
     private fun processTransaction(amount: BigDecimal, balance: Balance): ResponseCodeEnum {
@@ -75,8 +79,24 @@ class TransactionService(
 
     private fun updateBalance(balance: Balance, deduction: BigDecimal) = balanceService.update(
         balance.copy(availableAmount = balance.availableAmount - deduction)
-        // TODO add transaction history
     )
+
+    private fun createTransactionHistory(accountId: String, amount: BigDecimal, transactionCategoryName: String, merchant: String, response: ResponseCodeEnum) {
+        transactionHistoryService.save(
+            TransactionHistory(
+                accountId = accountId,
+                amount = amount,
+                transactionCategory = transactionCategoryName,
+                merchant = merchant,
+                responseCode = response.code,
+                responseMessage = response.message
+            )
+        )
+    }
+
+    fun getHistory(accountId: String): List<TransactionHistory> {
+        return transactionHistoryService.findByAccountId(accountId)
+    }
 
     companion object {
         private const val DEFAULT_TRANSACTION_CATEGORY = "CASH"
