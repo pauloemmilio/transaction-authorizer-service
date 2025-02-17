@@ -17,8 +17,8 @@ data class Merchant(
     val transactionCategory: String,
 
     @Column(name = "created_at", nullable = false, updatable = false)
-    val createdAt: LocalDateTime,
+    val createdAt: LocalDateTime? = LocalDateTime.now(),
 
     @Column(name = "updated_at", nullable = false)
-    var updatedAt: LocalDateTime
+    var updatedAt: LocalDateTime? = LocalDateTime.now()
 )
