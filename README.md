@@ -24,10 +24,6 @@ Para executar a aplicação, certifique-se de que possui os seguintes requisitos
    ```sh
    ./gradlew bootRun
    ```
-   Caso esteja no Windows (cmd/powershell):
-   ```cmd
-   gradlew bootRun
-   ```
 
 A aplicação estará disponível em `http://localhost:8080`
 
