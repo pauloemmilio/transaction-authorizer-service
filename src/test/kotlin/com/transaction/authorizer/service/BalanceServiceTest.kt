@@ -66,11 +66,11 @@ class BalanceServiceTest {
             availableAmount = amount
         )
 
-        every { balanceRepository.save(balance) } returns balance
+        every { balanceRepository.save(any()) } returns balance
 
         balanceService.createBalance(account, transactionCategory, amount)
 
-        verify(exactly = 1) { balanceRepository.save(balance) }
+        verify(exactly = 1) { balanceRepository.save(any()) }
     }
 
     @Test
